@@ -30,6 +30,5 @@ class MultiplicationServiceTest {
         // then
         assertEquals(multiplication.getFactorA(), 50);
         assertEquals(multiplication.getFactorB(), 30);
-        assertEquals(multiplication.getResult(), 1500);
     }
 }

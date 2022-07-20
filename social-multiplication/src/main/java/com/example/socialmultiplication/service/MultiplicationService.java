@@ -1,6 +1,7 @@
 package com.example.socialmultiplication.service;
 
 import com.example.socialmultiplication.domain.Multiplication;
+import com.example.socialmultiplication.domain.MultiplicationResultAttempt;
 
 public interface MultiplicationService {
 
@@ -11,4 +12,12 @@ public interface MultiplicationService {
      * @return
      */
     Multiplication createRandomMultiplication();
+
+    /**
+     * Check the answer
+     *
+     * @param resultAttempt
+     * @return If the answer is right, Return the true; otherwise return false
+     */
+    boolean checkAttempt(final MultiplicationResultAttempt resultAttempt);
 }

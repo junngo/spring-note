@@ -1,6 +1,8 @@
 package com.example.socialmultiplication.service;
 
 import com.example.socialmultiplication.domain.Multiplication;
+import com.example.socialmultiplication.domain.MultiplicationResultAttempt;
+import com.example.socialmultiplication.domain.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -31,6 +33,33 @@ class MultiplicationServiceImplTest {
         // then
         assertEquals(multiplication.getFactorA(), 50);
         assertEquals(multiplication.getFactorB(), 30);
-        assertEquals(multiplication.getResult(), 1500);
+    }
+
+    @Test
+    public void checkCorrectAttemptTest() {
+        // given
+        Multiplication multiplication = new Multiplication(50, 60);
+        User user = new User("jun");
+        MultiplicationResultAttempt attempt = new MultiplicationResultAttempt(user, multiplication, 3000);
+
+        // when
+        boolean attemptResult = multiplicationService.checkAttempt(attempt);
+
+        // then
+        assertTrue(attemptResult);
+    }
+
+    @Test
+    public void checkWrongAttemptTest() {
+        // given
+        Multiplication multiplication = new Multiplication(50, 60);
+        User user = new User("jun");
+        MultiplicationResultAttempt attempt = new MultiplicationResultAttempt(user, multiplication, 500);
+
+        // when
+        boolean attemptResult = multiplicationService.checkAttempt(attempt);
+
+        // then
+        assertFalse(attemptResult);
     }
 }

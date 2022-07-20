@@ -6,15 +6,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 @EqualsAndHashCode
-@RequiredArgsConstructor
 @ToString
+@RequiredArgsConstructor
 @Getter
-public final class Multiplication {
+public final class User {
 
-    private final int factorA;
-    private final int factorB;
+    private final String alias;
 
-    Multiplication() {
-        this(0, 0);
+    protected User() {
+        alias = null;
     }
 }
