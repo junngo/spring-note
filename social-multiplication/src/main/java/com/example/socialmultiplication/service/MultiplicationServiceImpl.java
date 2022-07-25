@@ -3,6 +3,8 @@ package com.example.socialmultiplication.service;
 import com.example.socialmultiplication.domain.Multiplication;
 import com.example.socialmultiplication.domain.MultiplicationResultAttempt;
 import com.example.socialmultiplication.domain.Users;
+import com.example.socialmultiplication.event.EventDispatcher;
+import com.example.socialmultiplication.event.MultiplicationSolvedEvent;
 import com.example.socialmultiplication.repository.MultiplicationResultAttemptRepository;
 import com.example.socialmultiplication.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,7 @@ public class MultiplicationServiceImpl implements MultiplicationService {
     private final RandomGeneratorService randomGeneratorService;
     private final MultiplicationResultAttemptRepository attemptRepository;
     private final UserRepository userRepository;
+    private final EventDispatcher eventDispatcher;
 
     @Override
     public Multiplication createRandomMultiplication() {
@@ -43,6 +46,12 @@ public class MultiplicationServiceImpl implements MultiplicationService {
                         correct
                 );
         attemptRepository.save(checkedAttempt);
+
+        eventDispatcher.send(new MultiplicationSolvedEvent(
+                checkedAttempt.getId(),
+                checkedAttempt.getUser().getId(),
+                checkedAttempt.isCorrect())
+        );
 
         return correct;
     }

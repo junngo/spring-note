@@ -10,3 +10,9 @@ spring:
     show_sql: true
   datasource:
     url: jdbc:h2:mem:testdb
+
+## RabbitMQ config
+multiplication:
+  exchange: multiplication_exchange
+  solved:
+    key: multiplication.solved
