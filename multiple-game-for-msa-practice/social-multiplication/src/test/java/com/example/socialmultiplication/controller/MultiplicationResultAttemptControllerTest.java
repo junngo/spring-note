@@ -110,4 +110,23 @@ class MultiplicationResultAttemptControllerTest {
                 response.getContentAsString()
         );
     }
+
+    @Test
+    public void getResultByIdTest() throws Exception {
+        // given
+        Users user = new Users("jun");
+        Multiplication multiplication = new Multiplication(50, 70);
+        MultiplicationResultAttempt attempt = new MultiplicationResultAttempt(
+                user, multiplication, 3500, true);
+        given(multiplicationService.getResultById(4L)).willReturn(attempt);
+
+        // when
+        MockHttpServletResponse response = mvc.perform(
+                get("/results/4"))
+                .andReturn().getResponse();
+
+        // then
+        assertEquals(HttpStatus.OK.value(), response.getStatus());
+        assertEquals(jsonResult.write(attempt).getJson(), response.getContentAsString());
+    }
 }

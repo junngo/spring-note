@@ -35,10 +35,10 @@ public class MultiplicationResultAttemptController {
         return ResponseEntity.ok(multiplicationService.getStatsForUser(alias));
     }
 
-    @NoArgsConstructor(force = true)
-    @RequiredArgsConstructor
-    @Getter
-    static final class ResultResponse {
-        private final boolean correct;
+    @GetMapping("/{resultId}")
+    ResponseEntity<MultiplicationResultAttempt> getResultById(final @PathVariable("resultId") Long resultId) {
+        return ResponseEntity.ok(
+                multiplicationService.getResultById(resultId)
+        );
     }
 }
