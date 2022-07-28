@@ -1,5 +1,7 @@
 package com.example.gamification.service;
 
+import com.example.gamification.client.MultiplicationResultAttemptClient;
+import com.example.gamification.client.dto.MultiplicationResultAttempt;
 import com.example.gamification.domain.Badge;
 import com.example.gamification.domain.BadgeCard;
 import com.example.gamification.domain.GameStats;
@@ -20,8 +22,11 @@ import java.util.stream.Collectors;
 @Service
 public class GameServiceImpl implements GameService {
 
+    public static final int LUCKY_NUMBER = 42;
+
     private final ScoreCardRepository scoreCardRepository;
     private final BadgeCardRepository badgeCardRepository;
+    private final MultiplicationResultAttemptClient attemptClient;
 
     @Override
     public GameStats newAttemptForUser(Long userId, Long attemptId, boolean correct) {
@@ -76,6 +81,17 @@ public class GameServiceImpl implements GameService {
                 !containsBadge(badgeCardList, Badge.FIRST_WON)) {
             BadgeCard firstWonBadge = giveBadgeToUser(Badge.FIRST_WON, userId);
             badgeCards.add(firstWonBadge);
+        }
+
+        // 행운의 숫자 배지
+        MultiplicationResultAttempt attempt = attemptClient
+                .retrieveMultiplicationResultAttemptById(attemptId);
+        if (!containsBadge(badgeCardList, Badge.LUCKY_NUMBER) &&
+                (LUCKY_NUMBER == attempt.getMultiplicationFactorA() ||
+                        LUCKY_NUMBER == attempt.getMultiplicationFactorB())) {
+            BadgeCard luckyNumberBadge = giveBadgeToUser(
+                    Badge.LUCKY_NUMBER, userId);
+            badgeCards.add(luckyNumberBadge);
         }
 
         return badgeCards;

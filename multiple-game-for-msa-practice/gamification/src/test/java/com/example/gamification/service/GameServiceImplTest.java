@@ -1,5 +1,7 @@
 package com.example.gamification.service;
 
+import com.example.gamification.client.MultiplicationResultAttemptClient;
+import com.example.gamification.client.dto.MultiplicationResultAttempt;
 import com.example.gamification.domain.Badge;
 import com.example.gamification.domain.BadgeCard;
 import com.example.gamification.domain.GameStats;
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
@@ -28,6 +31,9 @@ class GameServiceImplTest {
 
     @Mock
     BadgeCardRepository badgeCardRepository;
+
+    @Mock
+    private MultiplicationResultAttemptClient multiplicationClient;
 
     @InjectMocks
     private GameServiceImpl gameService;
@@ -45,6 +51,12 @@ class GameServiceImplTest {
                 .willReturn(Collections.singletonList(scoreCard));
         given(badgeCardRepository.findByUserIdOrderByBadgeTimestampDesc(userId))
                 .willReturn(Collections.emptyList());
+
+        // 기본적으로 행운의 숫자를 포함하지 않는 답안
+        MultiplicationResultAttempt attempt = new MultiplicationResultAttempt(
+                "john_doe", 20, 70, 1400, true);
+        given(multiplicationClient.retrieveMultiplicationResultAttemptById(anyLong()))
+                .willReturn(attempt);
 
         // given
         GameStats gameStats = gameService.newAttemptForUser(userId, attemptId, true);
@@ -69,6 +81,12 @@ class GameServiceImplTest {
         // 첫 번째 정답 배지는 이미 존재
         given(badgeCardRepository.findByUserIdOrderByBadgeTimestampDesc(userId))
                 .willReturn(Collections.singletonList(firstWonBadge));
+
+        // 기본적으로 행운의 숫자를 포함하지 않는 답안
+        MultiplicationResultAttempt attempt = new MultiplicationResultAttempt(
+                "john_doe", 20, 70, 1400, true);
+        given(multiplicationClient.retrieveMultiplicationResultAttemptById(anyLong()))
+                .willReturn(attempt);
 
         // when
         GameStats gameStats = gameService.newAttemptForUser(userId, attemptId, true);
@@ -117,5 +135,34 @@ class GameServiceImplTest {
         return IntStream.range(0, n)
                 .mapToObj(i -> new ScoreCard(userId, (long) i))
                 .collect(Collectors.toList());
+    }
+
+    @Test
+    public void processCorrectAttemptForLuckyNumberBadgeTest() {
+        // given
+        Long userId = 1L;
+        Long attemptId = 29L;
+        int totalScore = 10;
+        BadgeCard firstWonBadge = new BadgeCard(userId, Badge.FIRST_WON);
+        given(scoreCardRepository.getTotalScoreForUser(userId))
+                .willReturn(totalScore);
+        // 이 리파지토리는 방금 얻은 점수 카드를 반환
+        given(scoreCardRepository.findByUserIdOrderByScoreTimestampDesc(userId))
+                .willReturn(createNScoreCards(1, userId));
+        // 첫 번째 정답 배지는 이미 존재
+        given(badgeCardRepository.findByUserIdOrderByBadgeTimestampDesc(userId))
+                .willReturn(Collections.singletonList(firstWonBadge));
+        // 행운의 숫자가 포함된 답안
+        MultiplicationResultAttempt attempt = new MultiplicationResultAttempt(
+                "john_doe", 42, 10, 420, true);
+        given(multiplicationClient.retrieveMultiplicationResultAttemptById(attemptId))
+                .willReturn(attempt);
+
+        // when
+        GameStats iteration = gameService.newAttemptForUser(userId, attemptId, true);
+
+        // then - 스코어 카드 하나와 행운의 숫자 배지를 획득
+        assertEquals(ScoreCard.DEFAULT_SCORE, iteration.getScore());
+        assertEquals(Badge.LUCKY_NUMBER, iteration.getBadges().get(0));
     }
 }
